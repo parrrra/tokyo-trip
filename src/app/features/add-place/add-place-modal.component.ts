@@ -114,6 +114,7 @@ export class AddPlaceModalComponent implements OnChanges {
   }
 
   close() {
+    this.reset();
     this.closeModal.emit();
   }
 
