@@ -1,18 +1,37 @@
-<h1 class="text-4xl font-bold text-red-500">Tokyo Trip Planner 🇯🇵</h1>
+<div class="w-full flex justify-center mt-6">
+  <div
+    class="px-6 py-4 rounded-2xl bg-linear-to-r from-red-500 to-orange-400 text-white shadow-lg text-center"
+  >
+    <div class="text-sm uppercase tracking-widest opacity-80">Vuelo Madrid → Tokio</div>
+
+    <div class="text-4xl font-mono font-bold mt-2">⏳ {{ countdown() }}</div>
+
+    <div class="text-xs mt-1 opacity-80">1 de noviembre · 11:25</div>
+  </div>
+</div>
+
+<h1 class="text-4xl font-bold text-red-500 mt-6">Tokyo Trip Planner 🇯🇵</h1>
 
 <p class="mt-2 text-gray-600">Cuenta atrás y planificación del viaje</p>
 
-<button class="mt-4 px-4 py-2 bg-blue-500 text-white rounded" (click)="addItem()">
-  Añadir sitio
+<button
+  class="fixed bottom-6 right-6 bg-red-500 text-white rounded-full w-14 h-14 text-3xl shadow-lg"
+  (click)="openAddModal()"
+>
+  ＋
 </button>
 
-<ul class="mt-6">
-  @for (item of items(); track item.id) {
-  <li class="border-b py-2">
-    <strong>{{ item.name }}</strong>
-    <span class="text-sm text-gray-500"> ({{ item.category }}) </span>
-  </li>
-  }
-</ul>
+<add-place-modal
+  [open]="showAddModal"
+  (closeModal)="closeAddModal()"
+  (save)="onAddPlace($event)"
+></add-place-modal>
 
-<router-outlet />
+<timeline
+  [days]="days"
+  [places]="places"
+  [toggleVisited]="toggleVisited"
+  [deletePlace]="deletePlace"
+></timeline>
+
+<router-outlet></router-outlet>
