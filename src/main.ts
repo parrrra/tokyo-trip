@@ -1,6 +1,19 @@
 import { bootstrapApplication } from '@angular/platform-browser';
-import { appConfig } from './app/app.config';
+import { provideRouter } from '@angular/router';
+import { routes } from './app/app.routes';
+
+import { initializeApp } from 'firebase/app';
+import { getFirestore } from 'firebase/firestore';
+import { environment } from './environments/environment';
+
 import { App } from './app/app';
 
-bootstrapApplication(App, appConfig)
-  .catch((err) => console.error(err));
+// 🔥 Firebase
+const firebaseApp = initializeApp(environment.firebase);
+export const db = getFirestore(firebaseApp);
+
+bootstrapApplication(App, {
+  providers: [
+    provideRouter(routes)
+  ]
+});
