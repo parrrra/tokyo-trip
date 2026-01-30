@@ -1,24 +1,58 @@
-<div class="w-full flex justify-center mt-6">
-  <div
-    class="px-6 py-4 rounded-2xl bg-linear-to-r from-red-500 to-orange-400 text-white shadow-lg text-center"
-  >
-    <div class="text-sm uppercase tracking-widest opacity-80">Vuelo Madrid → Tokio</div>
+<div class="min-h-screen bg-gray-50">
+  <div class="max-w-3xl mx-auto px-4 pb-24">
+    <!-- HEADER -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-10 items-center">
+      <!-- LEFT: TITLE -->
+      <div>
+        <h1 class="text-2xl font-semibold text-gray-900">Tokyo Trip</h1>
 
-    <div class="text-4xl font-mono font-bold mt-2">⏳ {{ countdown() }}</div>
+        <p class="text-sm text-gray-500 mt-1">Planificación del viaje</p>
 
-    <div class="text-xs mt-1 opacity-80">1 de noviembre · 11:25</div>
+        <div class="flex gap-3 mt-4">
+          <div class="px-3 py-1 rounded-full text-xs bg-gray-200 text-gray-700">
+            {{ days().length }} días
+          </div>
+
+          <div class="px-3 py-1 rounded-full text-xs bg-gray-200 text-gray-700">
+            {{ places().length }} sitios
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: COUNTDOWN -->
+      <div class="flex md:justify-end">
+        <div
+          class="px-8 py-5 rounded-2xl bg-gradient-to-r from-red-500 to-orange-400 text-white shadow-lg text-center w-full md:w-auto"
+        >
+          <div class="text-xs uppercase tracking-widest opacity-80">Vuelo Madrid → Tokio</div>
+
+          <div class="text-3xl font-mono font-semibold mt-2">
+            {{ countdown() }}
+          </div>
+
+          <div class="text-xs mt-1 opacity-80">1 de noviembre · 11:25</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TIMELINE -->
+    <div class="mt-10">
+      <timeline
+        [days]="days"
+        [places]="places"
+        [toggleVisited]="toggleVisited"
+        [deletePlace]="deletePlace"
+      ></timeline>
+    </div>
   </div>
 </div>
 
-<h1 class="text-4xl font-bold text-red-500 mt-6">Tokyo Trip Planner 🇯🇵</h1>
-
-<p class="mt-2 text-gray-600">Cuenta atrás y planificación del viaje</p>
-
+<!-- FAB -->
 <button
-  class="fixed bottom-6 right-6 bg-red-500 text-white rounded-full w-14 h-14 text-3xl shadow-lg"
+  class="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-red-500 text-white shadow-xl flex items-center justify-center text-xl cursor-pointer hover:bg-red-600 transition"
   (click)="openAddModal()"
 >
-  ＋
+  <i class="fa-solid fa-plus"></i>
 </button>
 
 <add-place-modal
@@ -26,12 +60,5 @@
   (closeModal)="closeAddModal()"
   (save)="onAddPlace($event)"
 ></add-place-modal>
-
-<timeline
-  [days]="days"
-  [places]="places"
-  [toggleVisited]="toggleVisited"
-  [deletePlace]="deletePlace"
-></timeline>
 
 <router-outlet></router-outlet>

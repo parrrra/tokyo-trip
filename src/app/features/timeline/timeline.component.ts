@@ -9,22 +9,22 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule, DayAccordionComponent],
   template: `
-    <div class="text-sm text-gray-500 mb-4">
-      📅 {{ days().length }} días · 📍 {{ places().length }} sitios
+<div class="space-y-4">
+  @for (day of days(); track day.date) {
+    <div
+      class="bg-white rounded-xl border border-gray-100 px-5 py-4
+             hover:shadow-md transition"
+    >
+      <day-accordion
+        [day]="day"
+        [places]="getPlacesForDay(day)"
+        [toggleVisited]="toggleVisited"
+        [deletePlace]="deletePlace"
+      />
     </div>
+  }
+</div>
 
-    <div class="space-y-4">
-      @for (day of days(); track day.date) {
-        <div class="bg-white rounded-xl shadow p-4">
-          <day-accordion
-            [day]="day"
-            [places]="getPlacesForDay(day)"
-            [toggleVisited]="toggleVisited"
-            [deletePlace]="deletePlace"
-          />
-        </div>
-      }
-    </div>
   `
 })
 export class TimelineComponent {

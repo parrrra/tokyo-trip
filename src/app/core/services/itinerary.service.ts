@@ -17,16 +17,20 @@ export class ItineraryService {
 
   days = signal<Day[]>([]);
 
-  async loadDays() {
-    const snapshot = await getDocs(this.collectionRef);
+async loadDays() {
+  const snapshot = await getDocs(this.collectionRef);
 
-    this.days.set(
-      snapshot.docs.map(docSnap => ({
-        id: docSnap.id,
-        ...(docSnap.data() as Omit<Day, 'id'>)
-      }))
-    );
-  }
+  const days = snapshot.docs.map(docSnap => ({
+    id: docSnap.id,
+    ...(docSnap.data() as Omit<Day, 'id'>)
+  })) as Day[];
+
+  // 🔥 ORDENAR POR FECHA (YYYY-MM-DD se ordena perfecto como string)
+  days.sort((a, b) => a.date.localeCompare(b.date));
+
+  this.days.set(days);
+}
+
 
   async addPlaceToDay(dayDate: string, placeId: string) {
     let day = this.days().find(d => d.date === dayDate);

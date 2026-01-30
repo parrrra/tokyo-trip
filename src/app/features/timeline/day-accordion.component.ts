@@ -9,32 +9,34 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule, PlaceItemComponent],
   template: `
-    <div>
-      <div
-        class="flex justify-between items-center cursor-pointer"
-        (click)="open = !open"
-      >
-        <h3 class="font-semibold text-lg">
-          {{ formatDate(day.date) }}
-        </h3>
+<div>
+  <div
+    class="flex justify-between items-center cursor-pointer select-none"
+    (click)="open = !open"
+  >
+    <h3 class="font-semibold text-base">
+      {{ formatDate(day.date) }}
+    </h3>
 
-        <span class="text-gray-400 text-xl">
-          {{ open ? '⌄' : '›' }}
-        </span>
-      </div>
+    <i
+      class="fa-solid fa-chevron-down text-gray-400 transition"
+      [class.rotate-180]="open"
+    ></i>
+  </div>
 
-      @if (open) {
-        <div class="mt-3 space-y-1">
-          @for (place of places; track place.id) {
-            <place-item
-              [place]="place"
-              (toggle)="onToggle($event)"
-              (delete)="onDelete($event)"
-            />
-          }
-        </div>
+  @if (open) {
+    <div class="mt-4 space-y-2">
+      @for (place of places; track place.id) {
+        <place-item
+          [place]="place"
+          (toggle)="onToggle($event)"
+          (delete)="onDelete($event)"
+        />
       }
     </div>
+  }
+</div>
+
   `
 })
 export class DayAccordionComponent {
