@@ -27,11 +27,13 @@ import { CommonModule } from '@angular/common';
   @if (open) {
     <div class="mt-4 space-y-2">
       @for (place of places; track place.id) {
-        <place-item
-          [place]="place"
-          (toggle)="onToggle($event)"
-          (delete)="onDelete($event)"
-        />
+<place-item
+  [place]="place"
+  (toggle)="onToggle($event)"
+  (delete)="onDelete($event)"
+  (edit)="onEdit($event)"
+/>
+
       }
     </div>
   }
@@ -44,6 +46,11 @@ export class DayAccordionComponent {
   @Input({ required: true }) places!: Place[];
   @Input({ required: true }) toggleVisited!: (id: string) => void;
   @Input({ required: true }) deletePlace!: (id: string) => void;
+@Input({ required: true }) editPlace!: (place: Place) => void;
+
+onEdit(place: Place) {
+  this.editPlace(place);
+}
 
   open = true;
 

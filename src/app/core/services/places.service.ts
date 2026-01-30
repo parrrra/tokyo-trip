@@ -65,4 +65,25 @@ export class PlacesService {
       prev.filter(p => p.id !== placeId)
     );
   }
+
+async updatePlace(place: {
+  id: string;
+  name: string;
+  type: 'comida' | 'lugar';
+  mapsUrl: string;
+}) {
+  await updateDoc(doc(this.collectionRef, place.id), {
+    name: place.name,
+    type: place.type,
+    mapsUrl: place.mapsUrl
+  });
+
+  this.places.update(prev =>
+    prev.map(p =>
+      p.id === place.id ? { ...p, ...place } : p
+    )
+  );
+}
+
+
 }

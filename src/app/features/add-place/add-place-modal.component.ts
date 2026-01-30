@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Output, Input, OnChanges } from '@angular/core';
-import { PlaceType } from '../../core/models/place.model';
+import { Place, PlaceType } from '../../core/models/place.model';
 import { FormsModule } from '@angular/forms';
 import { TripService } from '../../core/services/trip.service';
 
@@ -9,60 +9,52 @@ import { TripService } from '../../core/services/trip.service';
   imports: [FormsModule],
   template: `
     @if (open()) {
-      <!-- OVERLAY -->
       <div
-        class="fixed inset-0 bg-black/40 flex justify-center items-center z-50 cursor-pointer"
+        class="fixed inset-0 bg-black/40 flex justify-center items-center z-50"
         (click)="close()"
       >
-        <!-- MODAL -->
         <div
-          class="bg-white rounded-xl p-6 w-full max-w-md cursor-default"
+          class="bg-white rounded-xl p-6 w-full max-w-md"
           (click)="$event.stopPropagation()"
         >
 
-          <h2 class="text-xl font-bold mb-4">Añadir sitio</h2>
+          <h2 class="text-xl font-bold mb-4">
+            {{ place ? 'Editar sitio' : 'Añadir sitio' }}
+          </h2>
 
           <div class="flex flex-col gap-3">
             <input
-              class="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-red-400"
-              placeholder="Nombre del sitio"
+              class="border p-2 rounded"
+              placeholder="Nombre"
               [(ngModel)]="name"
             />
 
-            <select
-              class="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-red-400"
-              [(ngModel)]="type"
-            >
-              <option value="food">Comida</option>
+            <select class="border p-2 rounded" [(ngModel)]="type">
+              <option value="comida">Comida</option>
               <option value="visit">Visita</option>
             </select>
 
-            <input
-              class="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-red-400"
-              type="date"
-              [(ngModel)]="day"
-              [min]="minDate"
-              [max]="maxDate"
-            />
+            @if (!place) {
+              <input
+                class="border p-2 rounded"
+                type="date"
+                [(ngModel)]="day"
+                [min]="minDate"
+                [max]="maxDate"
+              />
+            }
 
             <input
-              class="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-red-400"
-              placeholder="Google Maps (opcional)"
+              class="border p-2 rounded"
+              placeholder="Google Maps"
               [(ngModel)]="mapsUrl"
             />
           </div>
 
           <div class="flex justify-end gap-3 mt-6">
+            <button (click)="close()">Cancelar</button>
             <button
-              class="px-4 py-2 text-gray-600 hover:text-gray-900 cursor-pointer"
-              (click)="close()"
-            >
-              Cancelar
-            </button>
-
-            <button
-              class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded
-                     cursor-pointer transition disabled:opacity-40"
+              class="bg-red-500 text-white px-4 py-2 rounded"
               (click)="submit()"
               [disabled]="!canSubmit()"
             >
@@ -78,17 +70,19 @@ import { TripService } from '../../core/services/trip.service';
 export class AddPlaceModalComponent implements OnChanges {
 
   @Input({ required: true }) open!: () => boolean;
+  @Input() place: Place | null = null;
 
   @Output() closeModal = new EventEmitter<void>();
   @Output() save = new EventEmitter<{
+    id?: string;
     name: string;
     type: PlaceType;
-    day: string;
     mapsUrl: string;
+    day?: string;
   }>();
 
   name = '';
-  type: PlaceType = 'food';
+  type: PlaceType = 'comida';
   day = '';
   mapsUrl = '';
 
@@ -101,14 +95,22 @@ export class AddPlaceModalComponent implements OnChanges {
   }
 
   ngOnChanges() {
-    // al abrir el modal → fecha por defecto = inicio del viaje
-    if (this.open() && !this.day) {
-      this.day = this.minDate;
+    if (this.place) {
+      this.name = this.place.name;
+      this.type = this.place.type;
+      this.mapsUrl = this.place.mapsUrl ?? '';
+      return;
     }
+
+    this.day = this.minDate;
   }
 
   canSubmit() {
-    return this.name.trim() && this.day;
+    if (this.place) {
+      return this.name.trim().length > 0;
+    }
+
+    return this.name.trim().length > 0 && this.day;
   }
 
   close() {
@@ -117,10 +119,11 @@ export class AddPlaceModalComponent implements OnChanges {
 
   submit() {
     this.save.emit({
+      id: this.place?.id,
       name: this.name.trim(),
       type: this.type,
-      day: this.day,
-      mapsUrl: this.mapsUrl.trim() || ''
+      mapsUrl: this.mapsUrl.trim() || '',
+      day: this.place ? undefined : this.day
     });
 
     this.close();
@@ -129,7 +132,7 @@ export class AddPlaceModalComponent implements OnChanges {
 
   reset() {
     this.name = '';
-    this.type = 'food';
+    this.type = 'comida';
     this.day = '';
     this.mapsUrl = '';
   }

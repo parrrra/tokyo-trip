@@ -20,6 +20,7 @@ import { CommonModule } from '@angular/common';
         [places]="getPlacesForDay(day)"
         [toggleVisited]="toggleVisited"
         [deletePlace]="deletePlace"
+        [editPlace]="editPlace"
       />
     </div>
   }
@@ -32,7 +33,7 @@ export class TimelineComponent {
   @Input({ required: true }) places!: () => Place[];
   @Input({ required: true }) toggleVisited!: (id: string) => void;
   @Input({ required: true }) deletePlace!: (id: string) => void;
-
+    @Input({ required: true }) editPlace!: (place: Place) => void;
 
   getPlacesForDay(day: Day): Place[] {
     return this.places().filter(p => day.placeIds.includes(p.id));

@@ -1,4 +1,4 @@
-export type PlaceType = 'food' | 'visit';
+export type PlaceType = 'comida' | 'lugar';
 
 export interface Place {
   id: string;

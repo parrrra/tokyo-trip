@@ -42,6 +42,7 @@
         [places]="places"
         [toggleVisited]="toggleVisited"
         [deletePlace]="deletePlace"
+        [editPlace]="openEditModal"
       ></timeline>
     </div>
   </div>
@@ -57,8 +58,9 @@
 
 <add-place-modal
   [open]="showAddModal"
+  [place]="editingPlace()"
   (closeModal)="closeAddModal()"
-  (save)="onAddPlace($event)"
+  (save)="onSavePlace($event)"
 ></add-place-modal>
 
 <router-outlet></router-outlet>

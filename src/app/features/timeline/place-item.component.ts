@@ -53,6 +53,14 @@ import { CommonModule } from '@angular/common';
           </a>
         }
 
+        <button
+  class="text-gray-400 hover:text-gray-700 cursor-pointer"
+  (click)="edit.emit(place)"
+>
+  <i class="fa-solid fa-pen"></i>
+</button>
+
+
         @if (!place.visited) {
           <button
             class="text-gray-400 hover:text-red-500 cursor-pointer"
@@ -69,4 +77,6 @@ export class PlaceItemComponent {
   @Input({ required: true }) place!: Place;
   @Output() toggle = new EventEmitter<string>();
   @Output() delete = new EventEmitter<string>();
+  @Output() edit = new EventEmitter<Place>();
+
 }
