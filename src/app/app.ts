@@ -7,6 +7,7 @@ import { Place } from './core/models/place.model';
 import { Day } from './core/models/day.model';
 import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { TripService } from './core/services/trip.service';
 
 @Component({
   selector: 'app-root',
@@ -29,11 +30,12 @@ export class App implements OnInit {
   days!: () => Day[];
 
   showAddModal = signal(false);
-  editingPlace = signal<Place | null>(null);
+  editingPlace = signal<Place & { day: string } | null>(null);
 
   constructor(
     private placesService: PlacesService,
-    private itineraryService: ItineraryService
+    private itineraryService: ItineraryService,
+    private tripService: TripService
   ) {
     this.places = this.placesService.places;
     this.days = this.itineraryService.days;
@@ -82,45 +84,57 @@ export class App implements OnInit {
     this.showAddModal.set(true);
   };
 
-  openEditModal = (place: Place) => {
-    this.editingPlace.set(place);
-    this.showAddModal.set(true);
-  };
+openEditModal = (place: Place) => {
+  const day = this.itineraryService.getDayForPlace(place.id);
+
+  this.editingPlace.set({
+    ...place,
+    day: day ?? this.tripService.getStartDateISO()
+  });
+
+  this.showAddModal.set(true);
+};
+
 
   closeAddModal = () => {
     this.showAddModal.set(false);
     this.editingPlace.set(null);
   };
 
-  onSavePlace = async (data: {
-    id?: string;
-    name: string;
-    type: 'comida' | 'lugar';
-    mapsUrl: string;
-    day?: string;
-  }) => {
+ onSavePlace = async (data: {
+  id?: string;
+  name: string;
+  type: 'comida' | 'lugar';
+  mapsUrl: string;
+  day: string;
+}) => {
 
-    if (data.id) {
-      await this.placesService.updatePlace({
-        id: data.id,
-        name: data.name,
-        type: data.type,
-        mapsUrl: data.mapsUrl
-      });
-      return;
-    }
-
-    if (!data.day) return;
-
-    const placeId = await this.placesService.addPlace({
+  // ✏️ EDITAR
+  if (data.id) {
+    // 1. actualizar datos del place
+    await this.placesService.updatePlace({
+      id: data.id,
       name: data.name,
       type: data.type,
-      mapsUrl: data.mapsUrl,
-      visited: false
+      mapsUrl: data.mapsUrl
     });
 
-    await this.itineraryService.addPlaceToDay(data.day, placeId);
-  };
+    // 2. mover de día si es necesario
+    await this.itineraryService.movePlaceToDay(data.id, data.day);
+    return;
+  }
+
+  // ➕ CREAR
+  const placeId = await this.placesService.addPlace({
+    name: data.name,
+    type: data.type,
+    mapsUrl: data.mapsUrl,
+    visited: false
+  });
+
+  await this.itineraryService.addPlaceToDay(data.day, placeId);
+};
+
 
   get visitedCount(): number {
   return this.places().filter(p => p.visited).length;

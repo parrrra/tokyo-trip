@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Output, Input, OnChanges } from '@angular/core';
-import { Place, PlaceType } from '../../core/models/place.model';
+import { PlaceType } from '../../core/models/place.model';
 import { FormsModule } from '@angular/forms';
 import { TripService } from '../../core/services/trip.service';
 
@@ -34,15 +34,14 @@ import { TripService } from '../../core/services/trip.service';
               <option value="visit">Visita</option>
             </select>
 
-            @if (!place) {
-              <input
-                class="border p-2 rounded"
-                type="date"
-                [(ngModel)]="day"
-                [min]="minDate"
-                [max]="maxDate"
-              />
-            }
+            <!-- 👇 SIEMPRE visible -->
+            <input
+              class="border p-2 rounded"
+              type="date"
+              [(ngModel)]="day"
+              [min]="minDate"
+              [max]="maxDate"
+            />
 
             <input
               class="border p-2 rounded"
@@ -70,7 +69,7 @@ import { TripService } from '../../core/services/trip.service';
 export class AddPlaceModalComponent implements OnChanges {
 
   @Input({ required: true }) open!: () => boolean;
-  @Input() place: Place | null = null;
+  @Input() place: { id?: string; name: string; type: PlaceType; mapsUrl?: string; day?: string } | null = null;
 
   @Output() closeModal = new EventEmitter<void>();
   @Output() save = new EventEmitter<{
@@ -78,7 +77,7 @@ export class AddPlaceModalComponent implements OnChanges {
     name: string;
     type: PlaceType;
     mapsUrl: string;
-    day?: string;
+    day: string;
   }>();
 
   name = '';
@@ -99,17 +98,15 @@ export class AddPlaceModalComponent implements OnChanges {
       this.name = this.place.name;
       this.type = this.place.type;
       this.mapsUrl = this.place.mapsUrl ?? '';
+      this.day = this.place.day ?? this.minDate;
       return;
     }
 
+    this.reset();
     this.day = this.minDate;
   }
 
   canSubmit() {
-    if (this.place) {
-      return this.name.trim().length > 0;
-    }
-
     return this.name.trim().length > 0 && this.day;
   }
 
@@ -124,11 +121,10 @@ export class AddPlaceModalComponent implements OnChanges {
       name: this.name.trim(),
       type: this.type,
       mapsUrl: this.mapsUrl.trim() || '',
-      day: this.place ? undefined : this.day
+      day: this.day
     });
 
     this.close();
-    this.reset();
   }
 
   reset() {

@@ -32,44 +32,51 @@ async loadDays() {
 }
 
 
-  async addPlaceToDay(dayDate: string, placeId: string) {
-    let day = this.days().find(d => d.date === dayDate);
+async addPlaceToDay(dayDate: string, placeId: string) {
 
-    // 🧠 SI NO EXISTE EL DÍA → SE CREA
-    if (!day) {
-      const docRef = await addDoc(this.collectionRef, {
-        date: dayDate,
-        placeIds: [placeId]
-      });
+  const existingDay = this.days().find(d => d.date === dayDate);
 
-      const newDay: Day = {
-        id: docRef.id,
-        date: dayDate,
-        placeIds: [placeId]
-      };
+  // 🧠 NO EXISTE → CREAR
+  if (!existingDay) {
+    const docRef = await addDoc(this.collectionRef, {
+      date: dayDate,
+      placeIds: [placeId]
+    });
 
-      this.days.update(prev => [...prev, newDay]);
-      return;
-    }
-
-    // evitar duplicados
-    if (day.placeIds.includes(placeId)) return;
-
-    const updatedPlaceIds = [...day.placeIds, placeId];
-
-    await updateDoc(
-      doc(this.collectionRef, day.id),
-      { placeIds: updatedPlaceIds }
-    );
+    const newDay: Day = {
+      id: docRef.id,
+      date: dayDate,
+      placeIds: [placeId]
+    };
 
     this.days.update(prev =>
+      this.sortDays([...prev, newDay])
+    );
+
+    return;
+  }
+
+  // 🧠 EXISTE → ACTUALIZAR
+  if (existingDay.placeIds.includes(placeId)) return;
+
+  const updatedPlaceIds = [...existingDay.placeIds, placeId];
+
+  await updateDoc(
+    doc(this.collectionRef, existingDay.id),
+    { placeIds: updatedPlaceIds }
+  );
+
+  this.days.update(prev =>
+    this.sortDays(
       prev.map(d =>
-        d.id === day.id
+        d.id === existingDay.id
           ? { ...d, placeIds: updatedPlaceIds }
           : d
       )
-    );
-  }
+    )
+  );
+}
+
 
  async removePlaceFromAllDays(placeId: string) {
   const affectedDays = this.days().filter(d =>
@@ -104,6 +111,55 @@ async loadDays() {
       )
     );
   }
+}
+
+async movePlaceToDay(placeId: string, targetDayDate: string) {
+
+  const currentDay = this.days().find(d =>
+    d.placeIds.includes(placeId)
+  );
+
+  // si ya está en ese día → nada que hacer
+  if (currentDay?.date === targetDayDate) {
+    return;
+  }
+
+  // 1️⃣ quitar del día actual
+  if (currentDay) {
+    const updatedIds = currentDay.placeIds.filter(id => id !== placeId);
+
+    if (updatedIds.length === 0) {
+      // borrar día vacío
+      await deleteDoc(doc(this.collectionRef, currentDay.id));
+      this.days.update(prev =>
+        prev.filter(d => d.id !== currentDay.id)
+      );
+    } else {
+      await updateDoc(
+        doc(this.collectionRef, currentDay.id),
+        { placeIds: updatedIds }
+      );
+
+      this.days.update(prev =>
+        prev.map(d =>
+          d.id === currentDay.id
+            ? { ...d, placeIds: updatedIds }
+            : d
+        )
+      );
+    }
+  }
+
+  // 2️⃣ añadir al nuevo día
+  await this.addPlaceToDay(targetDayDate, placeId);
+}
+
+getDayForPlace(placeId: string): string | null {
+  const day = this.days().find(d => d.placeIds.includes(placeId));
+  return day ? day.date : null;
+}
+private sortDays(days: Day[]): Day[] {
+  return [...days].sort((a, b) => a.date.localeCompare(b.date));
 }
 
 
