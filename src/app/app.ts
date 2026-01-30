@@ -100,7 +100,6 @@ export class App implements OnInit {
     day?: string;
   }) => {
 
-    // ✏️ EDITAR
     if (data.id) {
       await this.placesService.updatePlace({
         id: data.id,
@@ -111,7 +110,6 @@ export class App implements OnInit {
       return;
     }
 
-    // ➕ CREAR
     if (!data.day) return;
 
     const placeId = await this.placesService.addPlace({
@@ -123,4 +121,9 @@ export class App implements OnInit {
 
     await this.itineraryService.addPlaceToDay(data.day, placeId);
   };
+
+  get visitedCount(): number {
+  return this.places().filter(p => p.visited).length;
+}
+
 }
